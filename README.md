@@ -1,2 +1,2 @@
 # photometry_with_sextractor
-Under development
+Not yet working
