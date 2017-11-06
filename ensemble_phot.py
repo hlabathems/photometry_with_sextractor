@@ -39,13 +39,13 @@ def main(infiles):
     mult_m, mult_merr = [], []
 
     reference_cs = extract_columns(infiles[max_idx])
-    reference_cs_hjd, reference_cs_m, reference_cs_merr = reference_cs['col2'], reference_cs['col5'], reference_cs['col6']
-    reference_cs_hjd, reference_cs_m, reference_cs_merr = get_sorted(reference_cs['col2'], reference_cs['col5'], reference_cs['col6'])
+    reference_cs_hjd, reference_cs_f, reference_cs_ferr = reference_cs['col2'], reference_cs['col3'], reference_cs['col4']
+    reference_cs_hjd, reference_cs_f, reference_cs_ferr = get_sorted(reference_cs['col2'], reference_cs['col3'], reference_cs['col4'])
 
     for k, infile in enumerate(infiles):
         cs = extract_columns(infile)
-        cs_hjd, cs_m, cs_merr = cs['col2'], cs['col5'], cs['col6']
-        cs_hjd, cs_m, cs_merr = get_sorted(cs['col2'], cs['col5'], cs['col6'])
+        cs_hjd, cs_m, cs_merr = cs['col2'], cs['col3'], cs['col4']
+        cs_hjd, cs_m, cs_merr = get_sorted(cs['col2'], cs['col3'], cs['col4'])
         
         indices = get_indices(reference_cs_hjd, cs_hjd)
         
