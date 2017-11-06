@@ -42,11 +42,11 @@ def cross_match(args):
     
     counter = 0
     
-    for catalog in glob.iglob('%s/*copy*' % (args.dir)):
+    for catalog in glob.iglob('%s/*cat' % (args.dir)):
         try:
             data = extract_columns(catalog)
 
-            without_ext = os.path.basename(catalog).split('_copy')[0]
+            without_ext = os.path.basename(catalog).split('.cat')[0]
             fits_file = '%s.fits' % (without_ext)
             idx = get_index(ref['NAME'], fits_file)
 
@@ -70,7 +70,7 @@ def cross_match(args):
 
             if dist[j] <= 0.0004 and data['FLAGS'][j] == 0:
                 with open(args.fout, 'a+') as outfile:
-                    outfile.write('%s %s %s %s %s %s %s %s %s\n' % (data['NUMBER'][j], hjd[0], data['FLUX_APER'][j], data['FLUXERR_APER'][j], data['M'][j], data['MERR'][j], data['ALPHA_J2000'][j], data['DELTA_J2000'][j], observatory))
+                    outfile.write('%s %s %s %s %s %s %s\n' % (data['NUMBER'][j], hjd[0], data['FLUX_APER'][j], data['FLUXERR_APER'][j], data['ALPHA_J2000'][j], data['DELTA_J2000'][j], observatory))
             
                 cat_ra, cat_dec = convertRA(data['ALPHA_J2000'][j]), convertDEC(data['DELTA_J2000'][j])
             
