@@ -1,7 +1,7 @@
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 import numpy as np
-from astropy.io import fits, ascii
+from astropy.io import ascii
 import argparse
 import glob
 import os
