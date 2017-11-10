@@ -1,7 +1,7 @@
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 import numpy as np
-from astropy.io import fits, ascii
+from astropy.io import ascii
 import argparse
 import glob
 import os
@@ -35,8 +35,8 @@ def convertRA(ra):
 def cross_match(args):
     c = SkyCoord('%s %s' % (args.ra, args.dec), unit = (u.hourangle, u.deg))
     
-    user_alpha = c.ra.value
-    user_delta = c.dec.value
+    image_ra = c.ra.value
+    image_dec = c.dec.value
     
     ref = extract_columns(args.fin)
     
@@ -63,8 +63,11 @@ def cross_match(args):
             if observatory == 'coj':
                 observatory = 'SSO'
 
-            diff_alpha = data['ALPHA_J2000'] - user_alpha
-            diff_delta = data['DELTA_J2000'] - user_delta
+            cat_ra = data['ALPHA_J2000']
+            cat_dec = data['DELTA_J2000']
+            
+            diff_alpha = cat_ra - image_ra
+            diff_delta = cat_dec - image_dec
 
             dist = np.sqrt(np.square(diff_alpha) + np.square(diff_delta))
             j = np.argmin(dist)
@@ -73,14 +76,13 @@ def cross_match(args):
                 
                 m = -2.5 * np.log10(data['FLUX_APER'][j] / exptime)
                 merr = 1.0857 * (data['FLUXERR_APER'][j] / data['FLUX_APER'][j])
-                S_N = data['FLUX_APER'][j] / data['FLUXERR_APER'][j]  # signal-to-noise
                 
                 with open(args.fout, 'a+') as outfile:
-                    outfile.write('%s.cat %s %s %s %s %s %s %s %s %s\n' % (without_ext, hjd[0], data['FLUX_APER'][j], data['FLUXERR_APER'][j], S_N, m[0], merr, data['ALPHA_J2000'][j], data['DELTA_J2000'][j], observatory))
+                    outfile.write('%s.cat %s %s %s %s %s %s %s %s\n' % (without_ext, hjd[0], data['FLUX_APER'][j], data['FLUXERR_APER'][j], m[0], merr, data['ALPHA_J2000'][j], data['DELTA_J2000'][j], observatory))
             
-                cat_ra, cat_dec = convertRA(data['ALPHA_J2000'][j]), convertDEC(data['DELTA_J2000'][j])
+                matched_ra, matched_dec = convertRA(cat_ra[j]), convertDEC(cat_dec[j])
             
-                print('Matched_RA: '+str(cat_ra), 'Matched_DEC: '+str(cat_dec))
+                print('Matched_RA: '+str(matched_ra), 'Matched_DEC: '+str(matched_dec))
         
                 counter = counter + 1
             else:
