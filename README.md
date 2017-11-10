@@ -33,14 +33,14 @@ Instructions
 
 4. Open one of the check images as a result of running step 3 above, you should see fixed apertures drawn around the detected objects in ds9. Choose more than one comparison star, preferably close to your target. E.g
 
-    | IMAGE_RA | IMAGE_DEC
-   --- | --- | ---
+   Stars   | IMAGE_RA | IMAGE_DEC
+   --- | ---      | ---
    cs1 | 10:23:10.881 | 19:52:06.005
    cs2 | 10:23:36.211 | 19:50:10.505
-   c3 | 10:23:41.751 | 19:51:32.212
+   c3  | 10:23:41.751 | 19:51:32.212
    
-  and so on. Lastly, your target star
+     and so on. Lastly, your target star
   
-      | IMAGE_RA | IMAGE_DEC
-   --- | --- | ---
+    Object   | IMAGE_RA | IMAGE_DEC
+   --- | ---      | ---
    target | 10:23:30.600 | 19:51:54.500
