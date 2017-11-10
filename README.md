@@ -23,7 +23,7 @@ Instructions
     
 2. Run the script run_create_table.py. This will create an ascii file with necessary extracted header information from your fits files using the powerful ccdproc:
 
-    python run_create_table -p /directory with fits files/ -f output.txt
+    `python run_create_table -p /directory with fits files/ -f output.txt`
     
    You can edit the script to add or replace some of the headers if you don't think they are relevant
    
