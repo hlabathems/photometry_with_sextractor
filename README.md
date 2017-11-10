@@ -37,10 +37,18 @@ Instructions
    --- | ---      | ---
    cs1 | 10:23:10.881 | 19:52:06.005
    cs2 | 10:23:36.211 | 19:50:10.505
-   c3  | 10:23:41.751 | 19:51:32.212
+   cs3  | 10:23:41.751 | 19:51:32.212
    
      and so on. Lastly, your target star
   
     Object   | IMAGE_RA | IMAGE_DEC
    --- | ---      | ---
    target | 10:23:30.600 | 19:51:54.500
+
+5. Now that we have selected our targets, we want to cross match our catalogs (.cat) against the selected objects in step 4.   Do to that we run_cross_match.py. For cs1 above, the code will output an ascii file called cs1.txt with matched information
+
+   `python run_cross_match.py --dir /directory where the catalogs to be read are stored/ --ra 10:23:10.881 --dec 19:52:06.005 --fin /name of outfile from 2/ --fout cs1.txt`
+   
+6. Lastly, run_differential.py on all cs files.
+
+   `python run_differential.py cs*txt`
