@@ -27,8 +27,9 @@ def source_extractor(args):
                 
                 aper_size = 10  # pixels
                 pixel_scale = 0 # to use WCS info
+                parameter_file = 'config.param'
                 
-                command = 'sex %s/%s -CATALOG_NAME %s.cat -PHOT_APERTURES %s -SATUR_LEVEL %s -GAIN %s -PIXEL_SCALE %s -CHECKIMAGE_TYPE APERTURES -CHECKIMAGE_NAME %s_checkimage.fits' % (args.dir2, fits_files[idx], without_extension_file, aper_size, saturate[idx], gain[idx], pixel_scale, without_extension_file)
+                command = 'sex %s/%s -CATALOG_NAME %s.cat -PARAMETERS_NAME %s -PHOT_APERTURES %s -SATUR_LEVEL %s -GAIN %s -PIXEL_SCALE %s -CHECKIMAGE_TYPE APERTURES -CHECKIMAGE_NAME %s_checkimage.fits' % (args.dir2, fits_files[idx], without_extension_file, parameter_file, aper_size, saturate[idx], gain[idx], pixel_scale, without_extension_file)
             
                 subprocess.call(command.split(), stdout = fo)
             
