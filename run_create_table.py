@@ -3,6 +3,21 @@ from astropy.io import ascii
 import argparse
 
 def create_table(args):
+    """
+    Parameters
+    ----------
+    args: array-like object 
+            corresponds to arguments passed by the user
+    
+    Returns
+    -------
+    filename: ascii
+    
+    See Also
+    --------
+    ccdproc: offers a table summarizing values of keywords in the FITS headers of the files
+    """
+    # You can remove or add FITS headers to suit your needs. These are what you'll probably need.
     ic = ImageFileCollection(location = args.path, keywords = ['HJD', 'FILTER', 'AIRMASS', 'EXPTIME', 'GAIN', 'SATURATE', 'L1ZP', 'L1ZPERR', 'SITEID'])
     
     data = [ic.summary['file'], ic.summary['HJD'], ic.summary['FILTER'], ic.summary['AIRMASS'], ic.summary['EXPTIME'], ic.summary['GAIN'], ic.summary['SATURATE'], ic.summary['L1ZP'], ic.summary['L1ZPERR'], ic.summary['SITEID']]
