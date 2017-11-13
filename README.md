@@ -12,7 +12,7 @@ In order to run this, one needs to install the following packages:
   * astropy
   * ccdproc
   * matplotlib
-  * sextractor (2.19.0)
+  * sextractor (2.19.5)
   * ds9
 
 Instructions
@@ -52,3 +52,7 @@ Instructions
 6. Lastly, run_differential.py on all cs files.
 
    `python run_differential.py cs*txt`
+
+  Here what you want is to choose a reference frame, by default the code uses frame 1. It will then determine and plot the  magnitude difference ($\Delta m - \Delta m_{ref_frame}$) between the reference frame and the rest of the frames. This tells how the magnitude of each star in Step 4 varies from the base (reference) frame to the next.
+  
+  From the plot, choose a reference star. The code will prompt you for the index of the reference star, then proceeds to calculate $\Delta m - \Delta m_{ref_star}$. Re-plot the results, at this point on the plot you expect to see the reference star and check star(s). If indeed that's the case, you can proceed to calculate the $\Delta m_{target} - \Delta m_{ref_star}$. 
