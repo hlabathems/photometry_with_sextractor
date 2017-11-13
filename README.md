@@ -31,7 +31,7 @@ Instructions
 
    `python run_source_extractor.py -d1 /directory where the extracted catalogs will be stored/ -d2 /directory where the fits files are/ -f /name of outfile from above/` 
 
-4. Open one of the check images as a result of running [step 3] above, you should see fixed apertures drawn around the detected objects in ds9. Choose more than one comparison star, preferably close to your target. E.g
+4. Open one of the check images as a result of running [step 3]() above, you should see fixed apertures drawn around the detected objects in ds9. Choose more than one comparison star, preferably close to your target. E.g
 
    Stars   | IMAGE_RA | IMAGE_DEC
    --- | ---      | ---
