@@ -31,7 +31,7 @@ Instructions
 
    `python run_source_extractor.py -d1 /directory where the extracted catalogs will be stored/ -d2 /directory where the fits files are/ -f /name of outfile from above/` 
 
-4. Open one of the check images as a result of running step 3 above, you should see fixed apertures drawn around the detected objects in ds9. Choose more than one comparison star, preferably close to your target. E.g
+4. Open one of the check images as a result of running [step 3] above, you should see fixed apertures drawn around the detected objects in ds9. Choose more than one comparison star, preferably close to your target. E.g
 
    Stars   | IMAGE_RA | IMAGE_DEC
    --- | ---      | ---
@@ -45,7 +45,7 @@ Instructions
    --- | ---      | ---
    target | 10:23:30.600 | 19:51:54.500
 
-5. Now that we have selected our targets, we want to cross match our catalogs (.cat) against the selected objects in step 4.   Do to that we run_cross_match.py. For cs1 above, the code will output an ascii file called cs1.txt with matched information
+5. Now that we have selected our targets, we want to cross match our catalogs (.cat) against the selected objects in [step 4].   Do to that we run_cross_match.py. For cs1 above, the code will output an ascii file called cs1.txt with matched information
 
    `python run_cross_match.py --dir /directory where the catalogs to be read are stored/ --ra 10:23:10.881 --dec 19:52:06.005 --fin /name of outfile from 2/ --fout cs1.txt`
    
@@ -53,7 +53,7 @@ Instructions
 
    `python run_differential.py cs*txt`
 
-  Here what you want is to choose a reference frame, by default the code uses frame 1. It will then determine and plot the  magnitude difference (`dm - dm_ref_frame`) between the reference frame and the rest of the frames. This tells how the magnitude of each star in Step 4 varies from the base (reference) frame to the next.
+  Here what you want is to choose a reference frame, by default the code uses frame 1. It will then determine and plot the  magnitude difference (`dm - dm_ref_frame`) between the reference frame and the rest of the frames. This tells how the magnitude of each star in [Step 4] varies from the base (reference) frame to the next.
   
   From the plot, choose a reference star. The code will prompt you for the index of the reference star, then proceeds to calculate `dm - dm_ref_star`. Re-plot the results, at this point on the plot you expect to see the reference star and check star(s). If indeed that's the case, you can proceed to calculate the `dm_target - dm_ref_star`.
   
