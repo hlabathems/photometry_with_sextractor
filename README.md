@@ -57,4 +57,4 @@ Instructions
   
   From the plot, choose a reference star. The code will prompt you for the index of the reference star, then proceeds to calculate $\Delta m - \Delta m_{ref_star}$. Re-plot the results, at this point on the plot you expect to see the reference star and check star(s). If indeed that's the case, you can proceed to calculate the $\Delta m_{target} - \Delta m_{ref_star}$.
   
-  [f1]: http://chart.apis.google.com/chart?cht=tx&chl=m_0c^2
+  <html>$m_0c^2$</html>
