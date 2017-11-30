@@ -15,7 +15,7 @@ def extract_columns(filename):
     """
     data = ascii.read(filename)
 
-    # only FITS taken in V filter
+    # only images taken in V filter
     mask = (data['FILTER'] == 'V')
 
     return data['NAME'][mask], data['GAIN'][mask], data['SATURATE'][mask]
