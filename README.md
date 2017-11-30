@@ -53,9 +53,9 @@ Instructions
 
    `python run_cross_match.py --dir /directory where the catalogs to be read are stored/ --ra 10:23:10.881 --dec 19:52:06.005 --fin /name of outfile from 2/ --fout cs1.txt`
    
-7. Lastly, run_differential.py on all cs files.
+7. Lastly, run_differential.py on all cs files and target.
 
-   `python run_differential.py cs*txt`
+   `python run_differential.py *txt`
 
   Here what you want is to choose a reference frame, by default the code uses frame 1. It will then determine and plot the  magnitude difference (`dm = m - m_ref_frame`) between the reference frame and the rest of the frames. This tells you how the magnitude of each star in [Step 4]() varies from the base (reference) frame to the next, and plot the results.
   
