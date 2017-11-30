@@ -1,162 +1,162 @@
+# Differential Photometry
+
 from astropy.io import ascii
-from matplotlib import pyplot as plt
 import numpy as np
+import pylab as pl
 import sys
 
-def extract_columns(filename):
-    """
-    Parameters
-    ----------
-    filename: ascii
-    
-    Returns
-    -------
-    data: array-like object
-    """
+
+# Read in light curves
+
+def readfile(filename):
+
     data = ascii.read(filename)
 
     return data
 
-def get_maximum(infiles):
-    """
-    Parameters
-    ----------
-    infiles: array of strings
-            files of the chosen comparison stars
+
+# Make arrays be of equal length, put nan where no measurement was detected
+
+def make_equal(filenames, max_length = None, assoc_idx = None):
+    if len(filenames) > 0 and max_length is not None and assoc_idx is not None:
+        mags = []
+        mag_errs = []
+
+        data = readfile(filenames[assoc_idx])
+        
+        ref_frames = data['CAT']
+        ref_hjd = data['HJD']
+        observ = data['OBS']
+        
+        for filename in filenames:
             
-    Returns
-    -------
-    max_length: int
-            maximum length
-    """
-    lengths = np.zeros(len(infiles), dtype = int)
-    
-    for k, infile in enumerate(infiles):
-        data = extract_columns(infile)
-        lengths[k] = len(data['col1'])
-    
-    max_idx = np.argmax(lengths)
-    max_length = lengths[max_idx]
-
-    return max_length
-
-def get_mean(mult_arr):
-    """
-    Parameters
-    ----------
-    mult_arr: n-dimensional array
-    
-    Returns:
-    --------
-    mean: array
-            mean of all the comparison stars, e.g (C1 + C2 + C3) / 3
-    """
-
-    return np.nanmean(mult_arr, axis = 0)
-
-def main(infiles):
-    """
-    Parameters
-    ----------
-    infiles: array of strings
-            files of the chosen comparison stars
+            data = readfile(filename)
+                
+            temp_list_m = [np.NAN] * max_length
+            temp_list_merr = [np.NAN] * max_length
             
-    Returns
-    -------
-    """
-    
-    # get maximum length
-    max_length = get_maximum(infiles)
-    
-    # initialize an n-dimensional array to hold magnitudes
-    mult_arr = []
-
-    # loop through input files
-    for infile in infiles:
-        data = extract_columns(infile)
-        # fill temporary list with nan's
-        temp_list = [np.NAN] * max_length
-        # replace nan's where applicable
-        for k, mag in enumerate(data['col6']):
-            temp_list[k] = mag
-        mult_arr.append(temp_list)
-
-    # uncomment the below two lines if you want to use the mean as reference star
-    #calc_mean = get_mean(mult_arr)
-    #mult_arr.append(calc_mean)
-    
-    # choose reference frame 
-    ref_frame = reference_frame(mult_arr)
-
-    # convert to array
-    ref_frame = np.array(ref_frame)
-    # subtract reference from each frame
-    dm = mult_arr - np.vstack(ref_frame)
-
-    # inspect the results
-    show_plots(dm, N = dm.shape[1])
-
-    # choose if any, the reference star index from the plot above
-    ref_idx = input('Enter the reference star index number (first being 0): ')
-
-    # check for variable star(s)
-    if ref_idx != '':
-            check_variable_stars(dm, ref_idx)
-    else:
-        print('No reference star was selected')
-
-def reference_frame(mult_arr, index = 0):
-    """
-    Parameters
-    ----------
-    mult_arr: n-dimensional array
-    index: int
-            index of the reference frame
+            matches = np.searchsorted(ref_frames, data['CAT'])
             
-    Returns:
-    -------
-    reference frame: array
-    """
-    return [row[index] for row in mult_arr]
+            N = len(matches)
 
-def check_variable_stars(delta_m, ref_star_index):
-    """
-    Parameters
-    ----------
-    delta_m: n-dimensional array
-    ref_star_index: int
-            index of the reference star
-            
-    Returns:
-    -------
-    magnitude difference: n-dimensional array
-    """
+            for k in range(N):
+                temp_list_m[matches[k]] = data['M'][k]
+                temp_list_merr[matches[k]] = data['MERR'][k]
+        
+            mags.append(temp_list_m)
+            mag_errs.append(temp_list_merr)
+                
+        return np.array(mags), np.array(mag_errs), ref_hjd, observ
+
+# Choose reference frame
+
+def reference_frame(mags, idx_frame = None):
+    if idx_frame is not None:
+        frame = np.array([row[idx_frame] for row in mags])
+        
+    return frame
+
+# subtract reference frame
+
+def dphot(mags, mag_errs, frame_num = 0):
+    ref_frame_mags = reference_frame(mags, idx_frame = frame_num)
+    ref_frame_mag_errs = reference_frame(mag_errs, idx_frame = frame_num)
     
-    # get ref star
-    dm_ref = delta_m[ref_star_index]
-    # dm
-    diff = delta_m - dm_ref
-    # plot
-    show_plots(diff, N = diff.shape[1])
-
-
-def show_plots(delta_m, N = 0):
+    dm = mags - np.vstack(ref_frame_mags)
     
+    # propagate errors
+    dmerr = np.sqrt(np.square(mag_errs) + np.square(np.vstack(ref_frame_mag_errs)))
+    
+    plot_lcurves(dm, dmerr)
+
+    return dm, dmerr
+
+# Check for variable stars
+
+def check_variable_stars(mags, mag_errs, ref_star_idx = None):
+    if ref_star_idx is not None:
+        ref_star_dm = mags[ref_star_idx]
+        ref_star_dmerr = mag_errs[ref_star_idx]
+        
+        subtract_ref_star_dm = mags - ref_star_dm
+        
+        # propagate errors
+        subtract_ref_star_dmerr = np.sqrt(np.square(mag_errs) + np.square(ref_star_dmerr))
+        
+        plot_lcurves(subtract_ref_star_dm, subtract_ref_star_dmerr)
+
+def plot_lcurves(mags, mag_errs):
     star_num = 1
     
-    for y in delta_m:
-        x = np.arange(1, N + 1)
-
-        plt.plot(x, y, '.', label = 'star_%s' % (star_num))
+    pl.figure()
+    
+    for k in range(len(mags)):
+        print(np.nanstd(mags[k]))
+        
+        frame_number = np.arange(1, len(mags[k]) + 1)
+        
+        pl.errorbar(frame_number, mags[k], yerr = mag_errs[k], fmt = '.', label = '%s' % (star_num))
     
         star_num += 1
+        
+    pl.gca().invert_yaxis()
+    pl.xlabel('Frame Number', fontweight = 'bold')
+    pl.ylabel('$\mathbf{\Delta m}$')
+    pl.legend(loc = 'best')
+    pl.grid()
+    pl.show()
 
-    plt.xlim([1, N])
-    plt.gca().invert_yaxis()
-    plt.xlabel('Frame Number', fontweight = 'bold')
-    plt.ylabel(r'$\mathbf{\Delta m}$')
-    plt.legend(loc = 'best')
-    plt.grid()
-    plt.show()
+def subtract_from_target(target_mags, target_mag_errs, dm, dmerr, hjd, observ, ref_idx = None):
+    zeropoint = 26
+    if ref_idx is not None:
+        corrected_mag = target_mags - dm[ref_idx] + zeropoint
+        corrected_mag_errs = np.sqrt(np.square(dmerr[ref_idx]) + np.square(target_mag_errs))
+        
+        idx = ~np.isnan(corrected_mag[0])
+        
+        x = hjd[idx]
+        y = corrected_mag[0][idx]
+        ye = corrected_mag_errs[0][idx]
+        observ = observ[idx]
 
-main(sys.argv[1:])
+        saao_idx = (observ == 'SAAO')
+        mcd_idx = (observ == 'McD')
+        sso_idx = (observ == 'SSO')
+        ctio_idx = (observ == 'CTIO')
+        
+        # remove outliers
+        mask = (y[saao_idx] < 24)
+        
+        pl.figure()
+
+        pl.errorbar(x[saao_idx][mask] - 2450000, y[saao_idx][mask], yerr = ye[saao_idx][mask], fmt = '.', color = 'brown', label = 'SAAO')
+
+        pl.errorbar(x[mcd_idx] - 2450000, y[mcd_idx], yerr = ye[mcd_idx], fmt = '.', color = 'red', label = 'McD')
+        pl.errorbar(x[sso_idx] - 2450000, y[sso_idx], yerr = ye[sso_idx], fmt = '.', color = 'green', label = 'SSO')
+        pl.errorbar(x[ctio_idx] - 2450000, y[ctio_idx], yerr = ye[ctio_idx], fmt = '.', color = 'blue', label = 'CTIO')
+        pl.gca().invert_yaxis()
+        pl.xlabel('HJD - 2450000', fontweight = 'bold')
+        pl.ylabel('V Magnitude', fontweight = 'bold')
+        pl.legend(loc = 'best')
+        pl.grid()
+        pl.show()
+
+if __name__ == '__main__':
+    # Load in data
+    filenames = sys.argv[1:]
+
+    # Unpack
+    mags, mag_errs, hjd, observatories = make_equal(filenames, max_length = 904, assoc_idx = 3)
+
+    # Separate target from comparison stars
+
+    target_mags = mags[np.arange(len(mags)) == 4]   # target magnitude
+    target_mag_errs = mag_errs[np.arange(len(mag_errs)) == 4]   # target magnitude errors
+    comp_mags = mags[np.arange(len(mags)) != 4]     # comparison stars magnitudes
+    comp_mag_errs = mag_errs[np.arange(len(mag_errs)) != 4]     # comparison stars magnitudes errors
+
+    dm, dmerr = dphot(comp_mags, comp_mag_errs, frame_num = 0)
+
+    check_variable_stars(dm, dmerr, ref_star_idx = 0)
+
+    subtract_from_target(target_mags, target_mag_errs, dm, dmerr, hjd, observatories, ref_idx = 2)
