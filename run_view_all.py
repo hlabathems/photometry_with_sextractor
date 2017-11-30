@@ -23,8 +23,8 @@ def extract_columns(filename):
 for filename in sys.argv[1:]:
     data = extract_columns(filename)
     
-    hjd = data['col2']
-    flux = data['col3']
+    hjd = data['HJD']
+    flux = data['FLUX']
     
     fname = os.path.basename(filename)
     
