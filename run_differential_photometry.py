@@ -14,6 +14,12 @@ def readfile(filename):
 
     return data
 
+# Get indices
+
+def get_indices(ref_data, data):
+    matches = [np.where(ref_data == item)[0][0] for item in data]
+    
+    return np.array(matches)
 
 # Make arrays be of equal length, put nan where no measurement was detected
 
@@ -35,7 +41,7 @@ def make_equal(filenames, max_length = None, assoc_idx = None):
             temp_list_m = [np.NAN] * max_length
             temp_list_merr = [np.NAN] * max_length
             
-            matches = np.searchsorted(ref_frames, data['CAT'])
+            matches = get_indices(ref_frames, data['CAT'])
             
             N = len(matches)
 
