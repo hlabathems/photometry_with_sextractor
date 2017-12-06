@@ -17,9 +17,9 @@ def readfile(filename):
 # Get indices
 
 def get_indices(ref_data, data):
-    matches = [np.where(ref_data == item)[0][0] for item in data]
+    matches = np.searchsorted(ref_data, data)
     
-    return np.array(matches)
+    return matches
 
 # Make arrays be of equal length, put nan where no measurement was detected
 
