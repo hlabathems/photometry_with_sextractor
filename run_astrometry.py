@@ -6,7 +6,7 @@ infiles = sys.argv[1:]
 
 # Put apikey
 
-apikey = 'psqszsmwidmbdmcx'
+apikey = 'put api key here'
 
 # Pass fits file to client script
 
