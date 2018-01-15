@@ -18,7 +18,7 @@ for img in infiles:
         _observatory = 'ctio'
     elif _observatory = 'ogg':
         _observatory = 'cfht'
-    else:
+    elif _observatory == 'coj':
         _observatory = 'sso'
 
     if 'HJD' not in hdr.keys():
