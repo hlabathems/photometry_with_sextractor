@@ -1,7 +1,5 @@
 # photometry_with_sextractor
-Doing differential photometry using sextractor. This is not a pipeline nor is it intended to be perfect. It assumes that the basic reduction (bias, flat, dark) steps have already been applied to your data. It only works on lcogt data so far.
-
-NB: This is still under development.
+Doing differential photometry using sextractor. This is not a pipeline nor is it intended to be perfect. It assumes that the basic reduction (bias, flat, dark) steps have already been applied to your data and that the astrometry is correct. This only works on LCOGT data so far.
 
 Installation
 ------------
@@ -21,7 +19,7 @@ Instructions
 1. Git clone into your local directory
     https://github.com/hlabathems/photometry_with_sextractor.git
     
-2. Inspect your fits header, check if HJD is not provided. If not, running to_HJD.py will include it to your fits headers.
+2. Inspect your fits header, check if HJD is provided. If not, running to_HJD.py will include it to your fits headers.
 
     `python to_HJD.py *fits`
     
@@ -49,7 +47,7 @@ Instructions
    --- | ---      | ---
    target | 10:23:30.600 | 19:51:54.500
 
-6. Now that we have selected our targets, we want to cross match our catalogs (.cat) against the selected objects in [step 4]().  To do that we run_cross_match.py. For cs1 above, the code will output an ascii file called cs1.txt with matched information. You may want to edit the script to use the different tolerance
+6. Now that we have selected our targets, we want to cross match our catalogs (.cat) against the selected objects in [step 4]().  To do that we run_cross_match.py. For cs1 above, the code will output an ascii file called cs1.txt with matched information. You may want to edit the script to use a tolerance of your choice
 
    `python run_cross_match.py --dir /directory where the catalogs to be read are stored/ --ra 10:23:10.881 --dec 19:52:06.005 --fin /name of outfile from 2/ --fout cs1.txt`
    
@@ -59,6 +57,6 @@ Instructions
 
   Here what you want is to choose a reference frame, by default the code uses frame 1. It will then determine and plot the  magnitude difference (`dm = m - m_ref_frame`) between the reference frame and the rest of the frames. This tells you how the magnitude of each star in [Step 4]() varies from the base (reference) frame to the next, and plot the results.
   
-  From the plot, choose a reference star. Here you will need to edit the script to put in the index of the reference star, then proceeds to calculate `dm - dm_ref_star` to check for variability. Re-plot the results, at this point on the plot you expect to see the reference star and check star(s). If indeed that's the case, you can proceed to calculate the `m_target - dm`.
+  From the plot, choose a reference star. Here you will need to edit the script to put in the index of the reference star, then proceed to calculate `dm - dm_ref_star` to check for variability. Re-plot the results, at this point on the plot you expect to see the reference star and check star(s). If indeed that's the case, you can proceed to calculate the `m_target - dm`.
   
    
