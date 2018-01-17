@@ -9,9 +9,9 @@ import sys
 # Read in light curves
 
 def readfile(filename):
-
+    
     data = ascii.read(filename)
-
+    
     return data
 
 # Get indices
@@ -30,31 +30,31 @@ def make_equal(filenames, max_length = None, assoc_idx = None):
     if len(filenames) > 0 and max_length is not None and assoc_idx is not None:
         mags = []
         mag_errs = []
-
-        data = readfile(filenames[assoc_idx])
         
-        ref_frames = data['CAT']
-        ref_hjd = data['HJD']
-        observ = data['OBS']
+        ref_data = readfile(filenames[assoc_idx])
+        
+        ref_frames = ref_data['CAT']
+        ref_hjd = ref_data['HJD']
+        observ = ref_data['OBS']
         
         for filename in filenames:
             
             data = readfile(filename)
-                
+            
             temp_list_m = [np.NAN] * max_length
             temp_list_merr = [np.NAN] * max_length
             
             matches = get_indices(ref_frames, data['CAT'])
             
             N = len(matches)
-
+            
             for k in range(N):
                 temp_list_m[matches[k]] = data['M'][k]
                 temp_list_merr[matches[k]] = data['MERR'][k]
-        
+            
             mags.append(temp_list_m)
             mag_errs.append(temp_list_merr)
-                
+        
         return np.array(mags), np.array(mag_errs), ref_hjd, observ
 
 # Choose reference frame
@@ -62,7 +62,7 @@ def make_equal(filenames, max_length = None, assoc_idx = None):
 def reference_frame(mags, idx_frame = None):
     if idx_frame is not None:
         frame = np.array([row[idx_frame] for row in mags])
-        
+    
     return frame
 
 # subtract reference frame
@@ -77,7 +77,7 @@ def dphot(mags, mag_errs, frame_num = 0):
     dmerr = np.sqrt(np.square(mag_errs) + np.square(np.vstack(ref_frame_mag_errs)))
     
     plot_lcurves(dm, dmerr)
-
+    
     return dm, dmerr
 
 # Check for variable stars
@@ -94,78 +94,81 @@ def check_variable_stars(mags, mag_errs, ref_star_idx = None):
         
         plot_lcurves(subtract_ref_star_dm, subtract_ref_star_dmerr)
 
+
 def plot_lcurves(mags, mag_errs):
     star_num = 1
+    
+    print('#####################################################')
     
     pl.figure()
     
     for k in range(len(mags)):
-        print(np.nanstd(mags[k]))
         
         frame_number = np.arange(1, len(mags[k]) + 1)
         
-        pl.errorbar(frame_number, mags[k], yerr = mag_errs[k], fmt = '.', label = '%s' % (star_num))
-    
-        star_num += 1
+        print(np.nanstd(mags[k]))
         
+        pl.errorbar(frame_number, mags[k], yerr = mag_errs[k], fmt = '.', label = '%s' % (star_num))
+        
+        star_num += 1
+    
     pl.gca().invert_yaxis()
     pl.xlabel('Frame Number', fontweight = 'bold')
     pl.ylabel('$\mathbf{\Delta m}$')
     pl.legend(loc = 'best')
     pl.grid()
-    pl.show()
+    #pl.show()
 
 def subtract_from_target(target_mags, target_mag_errs, dm, dmerr, hjd, observ, ref_idx = None):
-    zeropoint = 26
+
     if ref_idx is not None:
-        corrected_mag = target_mags - dm[ref_idx] + zeropoint
+        corrected_mag = target_mags - dm[ref_idx]
         corrected_mag_errs = np.sqrt(np.square(dmerr[ref_idx]) + np.square(target_mag_errs))
         
-        idx = ~np.isnan(corrected_mag[0])
+        x, y, ye, observ = hjd, corrected_mag[0], corrected_mag_errs[0], observ
         
-        x = hjd[idx]
-        y = corrected_mag[0][idx]
-        ye = corrected_mag_errs[0][idx]
-        observ = observ[idx]
+        N = len(x)
+        
+        frame_num = np.arange(1, N + 1, 1)
 
-        saao_idx = (observ == 'SAAO')
         mcd_idx = (observ == 'McD')
-        sso_idx = (observ == 'SSO')
-        ctio_idx = (observ == 'CTIO')
-        
-        # remove outliers
-        mask = (y[saao_idx] < 24)
+        cfht_idx = (observ == 'CFHT')
         
         pl.figure()
 
-        pl.errorbar(x[saao_idx][mask] - 2450000, y[saao_idx][mask], yerr = ye[saao_idx][mask], fmt = '.', color = 'brown', label = 'SAAO')
-
         pl.errorbar(x[mcd_idx] - 2450000, y[mcd_idx], yerr = ye[mcd_idx], fmt = '.', color = 'red', label = 'McD')
-        pl.errorbar(x[sso_idx] - 2450000, y[sso_idx], yerr = ye[sso_idx], fmt = '.', color = 'green', label = 'SSO')
-        pl.errorbar(x[ctio_idx] - 2450000, y[ctio_idx], yerr = ye[ctio_idx], fmt = '.', color = 'blue', label = 'CTIO')
+        pl.errorbar(x[cfht_idx] - 2450000, y[cfht_idx], yerr = ye[cfht_idx], fmt = '.', color = 'blue', label = 'CFHT')
         pl.gca().invert_yaxis()
-        pl.xlabel('HJD - 2450000', fontweight = 'bold')
-        pl.ylabel('V Magnitude', fontweight = 'bold')
         pl.legend(loc = 'best')
         pl.grid()
-        pl.show()
+
+        pl.figure()
+
+        pl.errorbar(frame_num, y, yerr = ye, fmt = '.', color = 'blue')
+        pl.xlim([1, N])
+        pl.gca().invert_yaxis()
+
+        #pl.show()
 
 if __name__ == '__main__':
+    
     # Load in data
     filenames = sys.argv[1:]
 
     # Unpack
-    mags, mag_errs, hjd, observatories = make_equal(filenames, max_length = 904, assoc_idx = 3)
-
+    mags, mag_errs, hjd, observatories = make_equal(filenames, max_length = 359, assoc_idx = 0)
+    
     # Separate target from comparison stars
 
-    target_mags = mags[np.arange(len(mags)) == 4]   # target magnitude
-    target_mag_errs = mag_errs[np.arange(len(mag_errs)) == 4]   # target magnitude errors
-    comp_mags = mags[np.arange(len(mags)) != 4]     # comparison stars magnitudes
-    comp_mag_errs = mag_errs[np.arange(len(mag_errs)) != 4]     # comparison stars magnitudes errors
+    target_mags = mags[np.arange(len(mags)) == 3]   # target magnitude
+    target_mag_errs = mag_errs[np.arange(len(mag_errs)) == 3]   # target magnitude errors
+    comp_mags = mags[np.arange(len(mags)) != 3]     # comparison stars magnitudes
+    comp_mag_errs = mag_errs[np.arange(len(mag_errs)) != 3]     # comparison stars magnitudes errors
 
     dm, dmerr = dphot(comp_mags, comp_mag_errs, frame_num = 0)
 
     check_variable_stars(dm, dmerr, ref_star_idx = 0)
 
-    subtract_from_target(target_mags, target_mag_errs, dm, dmerr, hjd, observatories, ref_idx = 2)
+    subtract_from_target(target_mags, target_mag_errs, dm, dmerr, hjd, observatories, ref_idx = 0)
+
+    pl.show()
