@@ -42,36 +42,30 @@ def source_extractor(args):
         os.mkdir(args.dir1)
 
     for idx, without_extension_file in enumerate(without_extension_files):
+            
+        # aperture size used, you can change to suit your needs
+        aper_size = 10  # pixels
+                
+        # default is 1, change to 0 to use WCS info
+        pixel_scale = 0 
+                
+        # parameter file which you created, perhaps you used a different name
+        parameter_file = 'config.param'
+                
+        # change some options in default.sex via the command line, this will overwrite the default values and save the terminal output to log file
+        command = 'sex %s/%s -CATALOG_NAME %s.cat -PARAMETERS_NAME %s -PHOT_APERTURES %s -SATUR_LEVEL %s -GAIN %s -PIXEL_SCALE %s -CHECKIMAGE_TYPE APERTURES -CHECKIMAGE_NAME %s_checkimage.fits | tee -a log' % (args.dir2, fits_files[idx], without_extension_file, parameter_file, aper_size, saturate[idx], gain[idx], pixel_scale, without_extension_file)
         
         try:
-            # save the log file to see what went down
-            with open('%s/LOG' % (args.dir1), 'a+') as fo:
-                
-                # aperture size used, you can change to suit your needs
-                aper_size = 10  # pixels
-                
-                # default is 1, change to 0 to use WCS info
-                pixel_scale = 0 
-                
-                # parameter file which you created, perhaps you used a different name
-                parameter_file = 'config.param'
-                
-                # change some options in default.sex via the command line, this will overwrite the default values
-                command = 'sex %s/%s -CATALOG_NAME %s.cat -PARAMETERS_NAME %s -PHOT_APERTURES %s -SATUR_LEVEL %s -GAIN %s -PIXEL_SCALE %s -CHECKIMAGE_TYPE APERTURES -CHECKIMAGE_NAME %s_checkimage.fits' % (args.dir2, fits_files[idx], without_extension_file, parameter_file, aper_size, saturate[idx], gain[idx], pixel_scale, without_extension_file)
+            # run the command
+            subprocess.call(command.split())
             
-                # run the command
-                subprocess.call(command.split(), stdout = fo)
-            
-            # move the file to args.dir1 if is there
-            if os.path.isfile('%s.cat' % (without_extension_file)):
-                os.system('mv %s.cat %s_checkimage.fits %s' % (without_extension_file, without_extension_file, args.dir1))
-            else:
-                print('%s.cat and/or %s_checkimage.fits could not be moved, check if either or both exist?' % (without_extension_file, without_extension_file))
-        
-        # I doubt this will be executed, but just in case
         except Exception as e:
             print('Oops something went wrong running sextractor on %s' % (fits_files[idx]))
-
+            
+        # move the file to args.dir1 if is there
+        if os.path.isfile('%s.cat' % (without_extension_file)):
+            os.system('mv %s.cat %s_checkimage.fits %s' % (without_extension_file, without_extension_file, args.dir1))
+            
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'This program will extract catalog(s) from image(s)')
 
