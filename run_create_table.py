@@ -3,11 +3,11 @@ from astropy.io import ascii
 import argparse
 
 def create_table(args):
-    ic = ImageFileCollection(location = args.path, keywords = ['HJD', 'FILTER', 'AIRMASS', 'EXPTIME', 'GAIN', 'SATURATE', 'L1FWHM', 'SECPIX', 'L1ZP', 'L1ZPERR', 'SITEID'])
+    ic = ImageFileCollection(location = args.path, keywords = ['HJD', 'FILTER', 'AIRMASS', 'EXPTIME', 'GAIN', 'SATURATE', 'L1FWHM', 'SECPIX', 'PIXSCALE', 'SITEID'])
     
-    data = [ic.summary['file'], ic.summary['HJD'], ic.summary['FILTER'], ic.summary['AIRMASS'], ic.summary['EXPTIME'], ic.summary['GAIN'], ic.summary['SATURATE'], ic.summary['L1FWHM'], ic.summary['SECPIX'], ic.summary['L1ZP'], ic.summary['L1ZPERR'], ic.summary['SITEID']]
+    data = [ic.summary['file'], ic.summary['HJD'], ic.summary['FILTER'], ic.summary['AIRMASS'], ic.summary['EXPTIME'], ic.summary['GAIN'], ic.summary['SATURATE'], ic.summary['L1FWHM'], ic.summary['SECPIX'], ic.summary['PIXSCALE'], ic.summary['SITEID']]
 
-    ascii.write(data, args.filename, names = ['NAME', 'HJD', 'FILTER', 'AIRMASS', 'EXPTIME', 'GAIN', 'SATURATE', 'L1FWHM', 'SECPIX', 'L1ZP', 'L1ZPERR', 'SITEID'], overwrite = True)
+    ascii.write(data, args.filename, names = ['NAME', 'HJD', 'FILTER', 'AIRMASS', 'EXPTIME', 'GAIN', 'SATURATE', 'L1FWHM', 'SECPIX', 'PIXSCALE', 'SITEID'], overwrite = True)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'This program will create a table containing raw images sorted according to type of filter, airmass etc')
