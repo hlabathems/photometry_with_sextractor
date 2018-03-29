@@ -1,7 +1,9 @@
 from astropy.io import fits, ascii
+import numpy as np
 import subprocess
 import argparse
 import os
+import sys
 
 def extract_columns(filename):
     """
@@ -18,7 +20,7 @@ def extract_columns(filename):
     # only images taken in V filter
     mask = (data['FILTER'] == 'V')
 
-    return data['NAME'][mask], data['GAIN'][mask], data['SATURATE'][mask]
+    return data['NAME'][mask], data['GAIN'][mask], data['L1FWHM'][mask], data['SECPIX'][mask], data['PIXSCALE'][mask], data['SATURATE'][mask]
 
 def source_extractor(args):
     """
@@ -32,7 +34,7 @@ def source_extractor(args):
     catalog, checkimages: ascii, fits
             sextractor will create these and will be stored in args.dir1
     """
-    fits_files, gain, saturate = extract_columns(args.filename)
+    fits_files, gain, seeing_fwhm, secpix, pixel_scale, saturate = extract_columns(args.filename)
     
     # remove the .fits extension
     without_extension_files = [os.path.splitext(os.path.basename(fits_file))[0] for fits_file in fits_files]
@@ -42,18 +44,23 @@ def source_extractor(args):
         os.mkdir(args.dir1)
 
     for idx, without_extension_file in enumerate(without_extension_files):
-            
+        
+        detect_minarea = 9
+        detect_thresh = 10.
+        analysis_thresh = 10.
+        
+        # convert to pixels
+        seeing_fwhm_pix = seeing_fwhm[idx] / secpix[idx]
+
         # aperture size used, you can change to suit your needs
-        aper_size = 10  # pixels
-                
-        # default is 1, change to 0 to use WCS info
-        pixel_scale = 0 
-                
+        aper_size = np.int(np.round(1.5 * seeing_fwhm_pix))  # pixels
+
         # parameter file which you created, perhaps you used a different name
-        parameter_file = 'config.param'
+        parameter_file = 'configuration_file.param'
+        configuration_file = 'configuration_file.sex'
                 
         # change some options in default.sex via the command line, this will overwrite the default values
-        command = 'sex %s/%s -CATALOG_NAME %s.cat -PARAMETERS_NAME %s -PHOT_APERTURES %s -SATUR_LEVEL %s -GAIN %s -PIXEL_SCALE %s -CHECKIMAGE_TYPE APERTURES -CHECKIMAGE_NAME %s_checkimage.fits' % (args.dir2, fits_files[idx], without_extension_file, parameter_file, aper_size, saturate[idx], gain[idx], pixel_scale, without_extension_file)
+        command = 'sex %s/%s -c %s -CATALOG_NAME %s.cat -PARAMETERS_NAME %s -DETECT_MINAREA %s -DETECT_THRESH %s -ANALYSIS_THRESH %s -PHOT_APERTURES %s -SATUR_LEVEL %s -GAIN %s -PIXEL_SCALE %s -SEEING_FWHM %s -CHECKIMAGE_TYPE APERTURES -CHECKIMAGE_NAME %s_checkimage.fits' % (args.dir2, fits_files[idx], configuration_file,  without_extension_file, parameter_file, detect_minarea, detect_thresh, analysis_thresh, aper_size, saturate[idx], gain[idx], pixel_scale[idx], seeing_fwhm_pix, without_extension_file)
         
         try:
             # run the command
